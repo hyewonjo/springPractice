@@ -25,7 +25,7 @@ public class UserService {
 	}
 	
 	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
+		this.dataSource = dataSource; 
 	}
 	
 	public void upgradeLevels() throws SQLException {
