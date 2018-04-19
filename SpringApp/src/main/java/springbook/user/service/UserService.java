@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -29,11 +30,15 @@ public class UserService {
 	}
 	
 	public void upgradeLevels() throws SQLException {
-		// 트랜잭션 동기화 관리자를 이용해 동기화 작업을 초기화한다.
+		/*
+		//
 		TransactionSynchronizationManager.initSynchronization();
-		// DB 커넥션을 생성하고 트랜잭션을 시작한다. 이후의 DAO 작업은 모두 여기서 시작한 트랜잭션 안에서 진행된다.
+		//
 		Connection c = DataSourceUtils.getConnection(dataSource);
 		c.setAutoCommit(false);
+		*/
+		
+		InitialContext ctx = new InitialContext();
 		
 		try {
 			List<User> users = userDao.getAll();
@@ -47,9 +52,9 @@ public class UserService {
 			c.rollback();
 			throw e;
 		}finally {
-			// 스프링 유틸리티 메소드를 이용해 DB커넥션을 안전하게 닫는다.
+			// 
 			DataSourceUtils.releaseConnection(c, dataSource);
-			// 동기화 작업 종료 및 정리
+			//
 			TransactionSynchronizationManager.unbindResource(this.dataSource);
 			TransactionSynchronizationManager.clearSynchronization();
 		}
