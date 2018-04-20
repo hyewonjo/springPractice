@@ -42,6 +42,75 @@ public class UserServiceTest {
 	
 	List<User> users;
 	
+	static class TestUserServiceException extends RuntimeException{}
+	
+	static class TestUserService extends UserServiceImpl{
+		private String id;
+		
+		private TestUserService(String id) {
+			this.id = id;
+		}
+		
+		@Override
+		protected void upgradeLevel(User user) {
+			if(user.getId().equals(this.id)) throw new TestUserServiceException();
+			super.upgradeLevel(user);
+		}
+	}
+	
+	static class MockMailSender implements MailSender{
+		
+		private List<String> requests = new ArrayList<String>();
+		
+		public List<String> getRequest(){
+			return requests;
+		}
+
+		@Override
+		public void send(SimpleMailMessage simpleMessage) throws MailException {
+			requests.add(simpleMessage.getTo()[0]);
+			
+		}
+
+		@Override
+		public void send(SimpleMailMessage... simpleMessages) throws MailException {
+			// TODO Auto-generated method stub
+			
+		}
+	}
+	
+	static class MockUserDao implements UserDao{
+		private List<User> users;
+		private List<User> updated = new ArrayList();
+		
+		private MockUserDao(List<User> users) {
+			this.users = users;
+		}
+		
+		public List<User> getUpdated(){
+			return this.updated;
+		}
+		
+		@Override
+		public List<User> getAll() { // 스텁 기능 제공
+			return this.users;
+		}
+		
+		@Override
+		public void update(User user) { // 목 오브젝트 기능 제공
+			updated.add(user);
+		}
+		
+		@Override
+		public void add(User user) { throw new UnsupportedOperationException();}
+		@Override
+		public User get(String id) { throw new UnsupportedOperationException();}
+		@Override
+		public void deleteAll() { throw new UnsupportedOperationException();}
+		@Override
+		public int getCount() { throw new UnsupportedOperationException();}
+	}
+	
 	@Before
 	public void setUp() {
 		users = Arrays.asList(
@@ -61,19 +130,21 @@ public class UserServiceTest {
 	@Test
 	@DirtiesContext // 컨텍스트의 DI 설정을 변경하는 테스트라는 것을 알려줌.
 	public void upgradeLevels() throws SQLException {
-		userDao.deleteAll();
-		for(User user : users) userDao.add(user);
+		// 고립된 테스트에서는 테스트 대상 오브젝트를 직접 생성하면 됨.
+		UserServiceImpl userServiceImpl = new UserServiceImpl();
+		
+		MockUserDao mockUserDao = new MockUserDao(this.users);
+		userServiceImpl.setUserDao(mockUserDao);
 		
 		MockMailSender mockMailSender = new MockMailSender();
 		userServiceImpl.setMailSender(mockMailSender);
 		
-		userService.upgradeLevels();
+		userServiceImpl.upgradeLevels();
 		
-		checkLevelUpgraded(users.get(0), false);
-		checkLevelUpgraded(users.get(1), true);
-		checkLevelUpgraded(users.get(2), false);
-		checkLevelUpgraded(users.get(3), true);
-		checkLevelUpgraded(users.get(4), false);
+		List<User> updated = mockUserDao.getUpdated();
+		assertThat(updated.size(), is(2));
+		checkUserAndLevel(updated.get(0), "joytouch", Level.SILVER);
+		checkUserAndLevel(updated.get(1), "madnite1", Level.GOLD);
 		
 		List<String> request = mockMailSender.getRequest();
 		assertThat(request.size(), is(2));
@@ -94,6 +165,12 @@ public class UserServiceTest {
 			assertThat(userUpdate.getLevel(), is(user.getLevel()));
 	}
 	
+	private void checkUserAndLevel(User updated, String expectedId, Level expectedLevel) {
+		assertThat(updated.getId(), is(expectedId));
+		assertThat(updated.getLevel(), is(expectedLevel));
+	}
+	
+	@Test
 	public void add() {
 		userDao.deleteAll();
 		
@@ -110,22 +187,6 @@ public class UserServiceTest {
 		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
 		assertThat(usetWithoutLevelRead.getLevel(), is(Level.BASIC));	
 	}
-	
-	static class TestUserService extends UserServiceImpl{
-		private String id;
-		
-		private TestUserService(String id) {
-			this.id = id;
-		}
-		
-		@Override
-		protected void upgradeLevel(User user) {
-			if(user.getId().equals(this.id)) throw new TestUserServiceException();
-			super.upgradeLevel(user);
-		}
-	}
-	
-	static class TestUserServiceException extends RuntimeException{}
 	
 	@Test
 	public void upgradeAllOrNothing() throws Exception {
@@ -146,27 +207,5 @@ public class UserServiceTest {
 		}catch(TestUserServiceException e) {}
 		
 		checkLevelUpgraded(users.get(1), false);
-	}
-
-	static class MockMailSender implements MailSender{
-		
-		private List<String> requests = new ArrayList<String>();
-		
-		public List<String> getRequest(){
-			return requests;
-		}
-
-		@Override
-		public void send(SimpleMailMessage simpleMessage) throws MailException {
-			requests.add(simpleMessage.getTo()[0]);
-			
-		}
-
-		@Override
-		public void send(SimpleMailMessage... simpleMessages) throws MailException {
-			// TODO Auto-generated method stub
-			
-		}
-		
 	}
 }
