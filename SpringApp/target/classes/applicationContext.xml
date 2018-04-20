@@ -14,14 +14,18 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 	
-	<bean id="userService" class="springbook.user.service.UserService">
-		<property name="userDao" ref="userDao" />
+	<bean id="userService" class="springbook.user.service.UserServiceTx">
 		<property name="transactionManager" ref="transactionManager" />
-		<property name="mailSender" ref="mailSender" />
+		<property name="userService" ref="userServiceImpl" />
 	</bean>
 	
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="userServiceImpl" class="springbook.user.service.UserServiceImpl">
+		<property name="userDao" ref="userDao" />
+		<property name="mailSender" ref="mailSender" />
 	</bean>
 	
 	<bean id="mailSender" class="springbook.user.service.DummyMailSender" />

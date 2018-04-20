@@ -4,8 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static springbook.user.service.UserService.MIN_RECOMMEND_FOR_GOLD;
+import static springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static springbook.user.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,17 +38,18 @@ public class UserServiceTest {
 	@Autowired DataSource dataSource;
 	@Autowired PlatformTransactionManager transactionManager;
 	@Autowired MailSender mailSender;
+	@Autowired UserServiceImpl userServiceImpl;
 	
 	List<User> users;
 	
 	@Before
 	public void setUp() {
 		users = Arrays.asList(
-				new User("bumjin", "¹Ú¹üÁø", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0, "hyewonjo92@gmail.com"),
-				new User("joytouch", "°­¸í¼º", "p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0, "hyewonjo92@gmail.com"),
-				new User("erwins", "½Å½ÂÇÑ", "p3", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD-1, "hyewonjo92@gmail.com"),
-				new User("madnite1", "ÀÌ»óÈ£", "p4", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD, "hyewonjo92@gmail.com"),
-				new User("green", "¿À¹Î±Ô", "p5", Level.GOLD, 100, Integer.MAX_VALUE, "hyewonjo92@gmail.com")
+				new User("bumjin", "ë°•ë²”ì§„", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0, "hyewonjo92@gmail.com"),
+				new User("joytouch", "ê°•ëª…ì„±", "p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0, "hyewonjo92@gmail.com"),
+				new User("erwins", "ì‹ ìŠ¹í•œ", "p3", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD-1, "hyewonjo92@gmail.com"),
+				new User("madnite1", "ì´ìƒí˜¸", "p4", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD, "hyewonjo92@gmail.com"),
+				new User("green", "ì˜¤ë¯¼ê·œ", "p5", Level.GOLD, 100, Integer.MAX_VALUE, "hyewonjo92@gmail.com")
 		);
 	}
 	
@@ -58,13 +59,13 @@ public class UserServiceTest {
 	}
 	
 	@Test
-	@DirtiesContext // ÄÁÅØ½ºÆ®ÀÇ DI ¼³Á¤À» º¯°æÇÏ´Â Å×½ºÆ®¶ó´Â °ÍÀ» ¾Ë·ÁÁÜ.
+	@DirtiesContext // ì»¨í…ìŠ¤íŠ¸ì˜ DI ì„¤ì •ì„ ë³€ê²½í•˜ëŠ” í…ŒìŠ¤íŠ¸ë¼ëŠ” ê²ƒì„ ì•Œë ¤ì¤Œ.
 	public void upgradeLevels() throws SQLException {
 		userDao.deleteAll();
 		for(User user : users) userDao.add(user);
 		
 		MockMailSender mockMailSender = new MockMailSender();
-		userService.setMailSender(mockMailSender);
+		userServiceImpl.setMailSender(mockMailSender);
 		
 		userService.upgradeLevels();
 		
@@ -110,7 +111,7 @@ public class UserServiceTest {
 		assertThat(usetWithoutLevelRead.getLevel(), is(Level.BASIC));	
 	}
 	
-	static class TestUserService extends UserService{
+	static class TestUserService extends UserServiceImpl{
 		private String id;
 		
 		private TestUserService(String id) {
@@ -128,16 +129,19 @@ public class UserServiceTest {
 	
 	@Test
 	public void upgradeAllOrNothing() throws Exception {
-		UserService testUserService = new TestUserService(users.get(3).getId());
+		UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(userDao);
-		testUserService.setTransactionManager(transactionManager);
 		testUserService.setMailSender(mailSender);
+		
+		UserServiceTx txUserService = new UserServiceTx();
+		txUserService.setTransactionManager(transactionManager);
+		txUserService.setUserService(testUserService);
 		
 		userDao.deleteAll();
 		for(User user : users) userDao.add(user);
 		
 		try {
-			testUserService.upgradeLevels();
+			txUserService.upgradeLevels();
 			fail("TestUserServiceException expected");
 		}catch(TestUserServiceException e) {}
 		
