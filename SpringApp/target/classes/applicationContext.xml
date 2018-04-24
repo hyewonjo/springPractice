@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<<<<<<< HEAD
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+=======
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+>>>>>>> feature/transaction_dynamic_proxy_적용
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
 		<property name="driverClass" value="com.mysql.cj.jdbc.Driver" />
@@ -14,11 +22,14 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 	
+<<<<<<< HEAD
 	<bean id="userService" class="springbook.user.service.UserServiceTx">
 		<property name="transactionManager" ref="transactionManager" />
 		<property name="userService" ref="userServiceImpl" />
 	</bean>
 	
+=======
+>>>>>>> feature/transaction_dynamic_proxy_적용
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
@@ -30,4 +41,15 @@
 	
 	<bean id="mailSender" class="springbook.user.service.DummyMailSender" />
 
+<<<<<<< HEAD
+=======
+	<tx:annotation-driven/>
+
+	<bean id="userService" class="springbook.user.service.UserServiceImpl" >
+		<property name="userDao" ref="userDao" />
+		<property name="mailSender" ref="mailSender" />
+	</bean>
+	
+	<bean id="testUserService" class="springbook.user.service.UserServiceTest$TestUserServiceImpl" parent="userService"/>
+>>>>>>> feature/transaction_dynamic_proxy_적용
 </beans>
