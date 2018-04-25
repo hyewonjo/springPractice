@@ -11,9 +11,13 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
+	<!--
+	@PostConstruct 애노테이션 처리용  
 	<context:annotation-config />
+	-->
 
-	<!-- db -->		
+	<!-- db -->
+	<!-- 		
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
 		<property name="driverClass" value="com.mysql.cj.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://localhost:3306/springbook?useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8" />
@@ -24,12 +28,16 @@
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
+	 -->
 	
+	<!-- 
 	<jdbc:embedded-database id="embeddedDatabase" type="HSQL">
 		<jdbc:script location="classpath:springbook/user/sqlservice/updatable/sqlRegistrySchema.sql"/>
 	</jdbc:embedded-database>
-	
+	 -->
+	 
 	<!-- sql service -->
+	<!-- 
 	<bean id="sqlService" class="springbook.user.sqlservice.OxmSqlService">
 		<property name="unmarshaller" ref="unmarshaller" /> 
 		<property name="sqlmap" value="classpath:/springbook/user/dao/sqlmap.xml" />
@@ -43,28 +51,29 @@
 	<bean id="sqlRegistry" class="springbook.user.sqlservice.updatable.EmbeddedDbSqlRegistry">
 		<property name="dataSource" ref="embeddedDatabase" />
 	</bean>
-
+ 	-->
 	<!-- aop -->
+	<!-- 
 	<tx:annotation-driven/>
-
+ 	-->
+ 	
 	<!--  application components -->
+	<!-- 
 	<bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
 		<property name="sqlService" ref="sqlService" />
 	</bean>
-	
+	 
 	<bean id="userService" class="springbook.user.service.UserServiceImpl" >
 		<property name="userDao" ref="userDao" />
 		<property name="mailSender" ref="mailSender" />
 	</bean>
+	-->
 	
-	<bean id="userServiceImpl" class="springbook.user.service.UserServiceImpl">
-		<property name="userDao" ref="userDao" />
-		<property name="mailSender" ref="mailSender" />
-	</bean>
-	
+	<!--
 	<bean id="testUserService" class="springbook.user.service.UserServiceTest$TestUserService" parent="userService"/>
 	
 	<bean id="mailSender" class="springbook.user.service.DummyMailSender" />
-
+	-->
+	
 </beans>
