@@ -34,21 +34,20 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 
+import springbook.TestApplicationContext;
 import springbook.user.dao.UserDao;
 import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="/applicationContext.xml")
+@ContextConfiguration(classes=TestApplicationContext.class)
 public class UserServiceTest {
 	@Autowired UserService userService;
 	@Autowired UserDao userDao;
 	@Autowired DataSource dataSource;
 	@Autowired PlatformTransactionManager transactionManager;
 	@Autowired MailSender mailSender;
-	@Autowired UserService userServiceImpl;
 	@Autowired ApplicationContext context; // 팩토리 빈을 가져오려면 애플리케이션 컨텍스트가 필요하다.
 	@Autowired UserService testUserService;
 	
@@ -56,7 +55,7 @@ public class UserServiceTest {
 	
 	static class TestUserServiceException extends RuntimeException{}
 
-	static class TestUserService extends UserServiceImpl{
+	public static class TestUserService extends UserServiceImpl{
 		private String id = "madnite1";
 		
 		@Override
