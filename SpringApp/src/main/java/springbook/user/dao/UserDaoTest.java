@@ -13,23 +13,27 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import springbook.TestApplicationContext;
+import springbook.AppContext;
 import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes=TestApplicationContext.class)
+@ActiveProfiles("test")
+@ContextConfiguration(classes=AppContext.class)
 public class UserDaoTest {
 	@Autowired UserDao dao; 
 	@Autowired DataSource dataSource;
+	@Autowired DefaultListableBeanFactory bf;
 	
 	private User user1;
 	private User user2;
@@ -40,6 +44,13 @@ public class UserDaoTest {
 		this.user1 = new User("gyumee", "박성철", "springno1", Level.BASIC, 1, 0, "hyewonjo92@gmail.com");
 		this.user2 = new User("leegw700", "이길원", "springno2", Level.SILVER, 55, 10, "hyewonjo92@gmail.com");
 		this.user3 = new User("bumjin", "박범진", "springno3", Level.GOLD, 100, 40, "hyewonjo92@gmail.com");
+	}
+	
+	@Test
+	public void beans() {
+		for(String n : bf.getBeanDefinitionNames()) {
+			System.out.println(n + " \t " + bf.getBean(n).getClass().getName());
+		}
 	}
 	
 	@Test 
