@@ -23,19 +23,27 @@
 	</listener>
 
 	<!-- Processes application requests -->
+	<!-- 
+	서블릿 웹 애플리케이션 컨텍스트 등록.
+	이렇게 등록된 DispatcherServlet은 초기화 시에 서블릿 레벨의 웹 애플리케이션을 생성해준다.
+	서블릿 컨텍스트가 사용할 설정파일 이름은 서블릿 이름 뒤에 -servlet.xml을 붙인 것이 디폴트이다. 
+	 -->
 	<servlet>
-		<servlet-name>appServlet</servlet-name>
+		<servlet-name>spring</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!-- 
+		디폴트 설정 사용하기 위해 주석. 
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
 			<param-value>/WEB-INF/spring/appServlet/servlet-context.xml</param-value>
 		</init-param>
+		 -->
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 		
 	<servlet-mapping>
-		<servlet-name>appServlet</servlet-name>
-		<url-pattern>/</url-pattern>
+		<servlet-name>spring</servlet-name>
+		<url-pattern>/app/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>
